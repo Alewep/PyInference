@@ -1,4 +1,11 @@
-from inference import fact_declare, FACTS
+from inference import fact, variable_declare as vd, FACTS
 
-fact_declare("je_tient_une_fourchette")
-fact_declare("nombre_de_couvert", 2)
+# --- declaration of variable ---
+cotes = vd("cotes")
+angles = vd("angles")
+diagonals = vd("diagonals")
+form = vd("form")
+# --declaration of facts --------
+fact(cotes, ("a", "a", "a", "a"))
+fact(angles, (90.0, 90.0, 90.0))
+fact(diagonals, ("a", "a"))

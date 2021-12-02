@@ -1,17 +1,16 @@
-import os
-
-import sympy
 
 
-def updateWihtoutOverWrite(dict1: dict, dict2: dict) -> bool:
-    dict2 = dict2.copy()
-    for key, value in dict1.items():
-        if key in dict2 and value != dict2[key]:
-            raise Exception(f"Conflit on fact '{key}'")
-        dict2[key] = value
+def sat(goal, facts):
+    for value in goal:
+        evaluation = sympy.sympify(value).subs(facts)
+        if evaluation.is_Boolean:
+            if not evaluation:
+                return False
+        else:
+            return False
+    return True
 
-    return dict2
-
+lamda **args :print(args[salut])
 
 class Rule:
     def __init__(self, head: list, body: dict) -> None:
@@ -21,19 +20,9 @@ class Rule:
     def __str__(self) -> str:
         return "Rule : " + str(self.head) + " -> " + str(self.body)
 
-    def have_goal(self, goal: dict):
-        for key, value in goal.items():
-            print(self.body)
-            if key in self.body and value == self.body[key]:
-                return True
-
-        return False
-
-    def is_trigger(self, facts):
-        triggers = []
-        for hd in self.head:
-            if sympy.sympify(hd).subs(facts):
-                pass
+    def have_as_goal(self, goal: list):
+        print("sat :", goal, self.body)
+        return sat(goal, self.body)
 
 
 class Rules:
@@ -43,16 +32,16 @@ class Rules:
     def addRule(self, rule: Rule) -> None:
         self.rules.append(rule)
 
-    def backtrack_chaining(self, goal: dict, facts: dict):
-        if goal.items() <= facts.items():
-            return goal
-
-        for i, rule in enumerate(self.rules):
-            if rule.have_goal(goal):
-                print("regle utilisé :", i)
-                if self.backtrack_chaining(rule.head, facts) is not None:
-                    return goal
-        return None
+    def backtrack_chaining(self, goal: list, facts: dict) -> bool:
+        if sat(goal, facts):
+            return True
+        for rule in self.rules:
+            # print(rule, rule.have_as_goal(goal))
+            if rule.have_as_goal(goal):
+                print("enter")
+                if self.backtrack_chaining(rule.head, facts):
+                    return True
+        return False
 
 
 RULES = Rules()
@@ -74,7 +63,7 @@ def rule_declare(head: list, body: dict):
     RULES.addRule(Rule(head, body))
 
 
-def fact_declare(name, value=True):
+def fact(name, value=True):
     if not value or isinstance(value, dict):
         raise Exception(f"Bad value type of fact '{name}' ")
     if isinstance(value, list):
@@ -84,7 +73,7 @@ def fact_declare(name, value=True):
     FACTS[name] = value
 
 
-def facts_declare(dict_fact: dict):
+def facts(dict_fact: dict):
     for key, value in dict_fact.items():
         if not value or isinstance(value, dict):
             raise Exception(f"Bad value type in fact '{key}' ")
@@ -96,9 +85,13 @@ def facts_declare(dict_fact: dict):
     FACTS.update(dict_fact)
 
 
+def variable_declare(name, type):
+    return sympy.Symbol(name, )
+
+
 def backtrack_chaining(goal):
     return RULES.backtrack_chaining(goal, FACTS)
 
 
-os.system("python rules.py")
-os.system("python facts.py")
+import facts
+import rules
