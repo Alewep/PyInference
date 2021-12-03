@@ -1,20 +1,21 @@
-def split(string_sep, separators):
-    res = []
-    last = 0  # the last position of an separators
-    index = 0
-    for index, char in enumerate(string_sep):
-        if char in operators:
-            res.append(string_sep[last:index].strip())  # strip if you dont want space enter separtors and words
-            res.append(char)
-            last = index + 1  # +1 to not take the separator
+class Var(object):
+    VARS = {}
 
-    # for the last add to the list
-    if last <= index:
-        res.append(string_sep[last:])
-    return res
+    def __new__(cls, name, type=bool, *args, **kwargs):
+        if name in Var.VARS:
+            raise Exception("A variable was already declare with the same name ")
+        Var.VARS[name] = super(Var, cls).__new__(cls, *args, **kwargs)
+        return Var.VARS[name]
+
+    def __init__(self, name, type=bool):
+        self.name = name
+        self.type = type
+        self.value = None
+
+    def __repr__(self):
+        return self.name
 
 
-operators = ["+", "-", "*"]
-string_sep = "three hundred + four - fifty six * eight"
+x = Var("x", int)
 
-print(split(string_sep, operators))
+print({x: 1})

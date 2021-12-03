@@ -1,11 +1,13 @@
-from inference import fact, variable_declare as vd, FACTS
+
+from inference import variable_declare as vd
+from inference import *
 
 # --- declaration of variable ---
-cotes = vd("cotes")
-angles = vd("angles")
-diagonals = vd("diagonals")
-form = vd("form")
+cotes = vd("cotes", list)
+angles = vd("angles", list)
+diagonals = vd("diagonals", list)
+form = vd("form", str)
 # --declaration of facts --------
-fact(cotes, ("a", "a", "a", "a"))
-fact(angles, (90.0, 90.0, 90.0))
-fact(diagonals, ("a", "a"))
+fact(cotes, ["a", "a", "a", "a"])
+fact(angles, [90.0, 90.0, 90.0])
+fact(diagonals, ["a", "a"])

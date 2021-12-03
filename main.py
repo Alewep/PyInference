@@ -1,5 +1,3 @@
-from inference import backtrack_chaining
-from facts import *
-from sympy import *
+from rules import *
 
-print(backtrack_chaining([Eq(form, "Square")]))
+print(backtrack_chaining([lambda: form == "Square"]))
