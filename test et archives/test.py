@@ -1,21 +1,17 @@
-class Var(object):
-    VARS = {}
+import tkinter as tk
 
-    def __new__(cls, name, type=bool, *args, **kwargs):
-        if name in Var.VARS:
-            raise Exception("A variable was already declare with the same name ")
-        Var.VARS[name] = super(Var, cls).__new__(cls, *args, **kwargs)
-        return Var.VARS[name]
+root = tk.Tk()
 
-    def __init__(self, name, type=bool):
-        self.name = name
-        self.type = type
-        self.value = None
-
-    def __repr__(self):
-        return self.name
+menuBar = tk.Menu(root)
+menu1 = tk.Menu(root)
+submenu = tk.Menu(root)
+submenu.add_radiobutton(label="trace")
+submenu.add_radiobutton(label="trace with details")
+submenu.add_radiobutton(label="no trace")
 
 
-x = Var("x", int)
+menuBar.add_cascade(label="Parameters", menu=menu1)
+menu1.add_cascade(label="Trace in terminal", menu=submenu)
 
-print({x: 1})
+root.config(menu=menuBar)
+root.mainloop()
