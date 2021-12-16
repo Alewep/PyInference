@@ -8,7 +8,7 @@ title = "Geometric shape recognition"
 chaining_type = "type of chaining:"
 goal = "goal :"
 forms = ["nothing", "point", "trait", "square", "rectangle", 'triangle', "parallelogram", "equilateral triangle",
-         "isosceles triangle", "rectangle triangle","quadrilateral"]
+         "isosceles triangle", "rectangle triangle", "quadrilateral"]
 inf = "Start inference"
 number_point = "number of point:"
 
@@ -87,7 +87,7 @@ def painting_forms(event):
     add = FORM.add_point((x, y))
     if add:
         canvas.create_oval(x - r, y - r, x + r, y + r, fill="blue")
-        label_nb_point.config(text=number_point+str(len(FORM.points)))
+        label_nb_point.config(text=number_point + str(len(FORM.points)))
     p1, p2 = FORM.last_line()
     if p1 is not None and p2 is not None:
         canvas.create_line(p1[0], p1[1], p2[0], p2[1], width=2, fill="red")
@@ -107,11 +107,11 @@ def execute():
     if combo_box.get() == values_chaining[0]:
         resp = str(rules.RULES.backward_chaining([
             lambda var: var[combo_box_forms.get()]
-        ], FORM.to_facts(), trace=trace, details=details))
+        ], FORM.to_facts(), trace=trace, details=details, meta=meta))
     if combo_box.get() == values_chaining[1]:
-        resp = str(rules.RULES.foward_chaining_deepth(FORM.to_facts(), trace=trace, details=details))
+        resp = str(rules.RULES.foward_chaining_deepth(FORM.to_facts(), trace=trace, details=details, meta=meta))
     if combo_box.get() == values_chaining[2]:
-        resp = str(rules.RULES.forward_chaining_width(FORM.to_facts(), trace=trace, details=details))
+        resp = str(rules.RULES.forward_chaining_width(FORM.to_facts(), trace=trace, details=details, meta=meta))
 
     entry.delete(0, "end")
     entry.insert(0, resp)
@@ -121,6 +121,7 @@ def execute():
 FORM = Form()
 trace = False
 details = False
+meta = True
 
 root = tk.Tk(className=title)
 root.geometry("800x500")
@@ -154,7 +155,6 @@ combo_box_forms.pack(side=tk.LEFT)
 combo_box_forms.set(value=forms[0])
 
 
-
 # menu
 def option_trace():
     global trace, details
@@ -177,6 +177,14 @@ def option_no_trace():
     return trace and details
 
 
+def option_meta():
+    global meta
+    if meta:
+        meta = False
+    else:
+        meta = True
+
+
 menuBar = tk.Menu(root)
 menu1 = tk.Menu(root)
 submenu = tk.Menu(root)
@@ -186,6 +194,7 @@ submenu.add_radiobutton(label="no trace", command=option_no_trace)
 
 menuBar.add_cascade(label="Parameters", menu=menu1)
 menu1.add_cascade(label="Trace in terminal", menu=submenu)
+menu1.add_checkbutton(label="deactivate meta rules", command=option_meta,)
 
 root.config(menu=menuBar)
 

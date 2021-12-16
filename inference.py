@@ -1,5 +1,6 @@
 import inspect
 import os
+import re
 
 
 def clear():
@@ -42,6 +43,18 @@ def update_fact(facts1: dict, facts2: dict):
     return facts1
 
 
+def _test_rule(head: list, body: dict):
+    for hd in head:
+        if not callable(hd):
+            raise Exception(f"Error '{hd}' clause was not declared as a callable")
+    new_body = {}
+    for key, value in body.items():
+        if isinstance(value, dict):
+            raise Exception(f"Error '{value}' dict into dict body rule was forbiden")
+        if not (not value or value is None):
+            new_body[key] = value
+
+
 class Rule:
     def __init__(self, head: list, body: dict) -> None:
         self.head = head
@@ -66,13 +79,39 @@ class Rule:
 class Rules:
     def __init__(self) -> None:
         self.rules = []
+        self.meta_rules = []
 
-    def addRule(self, rule: Rule) -> None:
+    def add_rule(self, rule: Rule) -> None:
         self.rules.append(rule)
 
-    def backward_chaining(self, goals: list, facts: dict, trace=True, details=True) -> bool:
-        if trace:print("---------- backward_chaining ---------")
-        rules = self.rules.copy()
+    def add_meta_rules(self, rule: Rule):
+        self.meta_rules.append(rule)
+
+    def meta_rules_apply(self, facts, active=False, trace=True):
+        rules_res = self.rules.copy()
+        if active:
+            for meta in self.meta_rules:
+                rules = self.rules.copy()
+                if meta.sat(facts):
+                    for key in meta.body:
+                        if meta.body[key]:
+                            if re.match(r"hide-[0-9]+-to-[0-9]+", key):
+                                indices = key.split("-")
+                                if trace: print("\033[93m", f">> hide rule {indices[1]} to {indices[3]}", "\033[0m", sep="")
+                                del rules[int(indices[1])-1:int(indices[3])]
+                            if re.match(r"up-[0-9]+-to-[0-9]+", key):
+                                indices = key.split("-")
+                                if trace: print("\033[93m", f">> up rule {indices[1]} to {indices[3]}", "\033[0m", sep="")
+                                temp = rules[int(indices[1])-1:int(indices[3])]
+                                del rules[int(indices[1])-1:int(indices[3])]
+                                for val in temp:
+                                    rules.insert(0, val)
+                    rules_res = list(set(rules_res) & set(rules))
+        return rules_res
+
+    def backward_chaining(self, goals: list, facts: dict, trace=True, details=True, meta=True) -> bool:
+        if trace: print("---------- backward_chaining ---------")
+        rules = self.meta_rules_apply(facts, active=meta,trace=trace)
         facts = facts.copy()
         number_rules = 0
         while goals:
@@ -93,16 +132,17 @@ class Rules:
                 if trace and details: print(rule)
 
             if never:
-                if trace:print("\033[91m", "Cannot be satisfied ", str_head(goal), "\033[0m", sep="")
-                if trace:print("\033[93m","Number of rules tested : ",number_rules,"\033[0m", sep="")
+                if trace: print("\033[91m", "Cannot be satisfied ", str_head(goal), "\033[0m", sep="")
+                if trace: print("\033[93m", "Number of rules tested : ", number_rules, "\033[0m", sep="")
                 return False
+        if trace: print("\033[93m", "Number of rules tested : ", number_rules, "\033[0m", sep="")
         return True
 
-    def foward_chaining_deepth(self, facts: dict, trace=True, details=True):
+    def foward_chaining_deepth(self, facts: dict, trace=True, details=True, meta=True):
         number_rules = 0
         if trace: print("---------- foward_chaining (in deepth) ---------")
         facts = facts.copy()
-        rules = self.rules.copy()
+        rules = self.meta_rules_apply(facts, active=meta,trace=trace)
         facts_start = facts.copy()
         can_deduct = True
         while can_deduct:
@@ -118,7 +158,8 @@ class Rules:
                     if trace: print("-")
                     facts = update_fact(facts, rule.body)
                     rules_del.remove(rule)
-                elif trace and details: print(rule)
+                elif trace and details:
+                    print(rule)
             rules = rules_del
 
             if facts_size < len(facts):
@@ -129,10 +170,10 @@ class Rules:
         if trace: print(facts)
         return {key: facts[key] for key in facts.keys() - facts_start.keys()}
 
-    def forward_chaining_width(self, facts: dict, trace=True, details=True):
+    def forward_chaining_width(self, facts: dict, trace=True, details=True, meta=True):
         if trace: print("---------- foward_chaining (in deepth) ---------")
         facts = facts.copy()
-        rules = self.rules.copy()
+        rules = self.meta_rules_apply(facts, active=meta,trace=trace)
         facts_start = facts.copy()
         number_rules = 0
         can_deduct = True
@@ -149,14 +190,15 @@ class Rules:
                     if trace: print("-")
                     facts_deduct = update_fact(facts_deduct, rule.body)
                     rules.remove(rule)
-                elif trace and details: print(rule)
+                elif trace and details:
+                    print(rule)
 
             facts = facts_deduct
             if facts_size < len(facts):
                 can_deduct = True
 
         if trace: print("\033[91m", "Cannot deduct anymore", "\033[0m", sep="")
-        if trace:print("\033[93m","Number of rules tested : ",number_rules,"\033[0m", sep="")
+        if trace: print("\033[93m", "Number of rules tested : ", number_rules, "\033[0m", sep="")
         if trace: print(facts)
         return {key: facts[key] for key in facts.keys() - facts_start.keys()}
 
@@ -166,17 +208,13 @@ FACTS = {}
 
 
 def rule_declare(head: list, body: dict):
-    for hd in head:
-        if not callable(hd):
-            raise Exception(f"Error '{hd}' clause was not declared has a callable")
-    new_body = {}
-    for key, value in body.items():
-        if isinstance(value, dict):
-            raise Exception(f"Error '{value}' dict into dict body rule was forbiden")
-        if not (not value or value is None):
-            new_body[key] = value
+    _test_rule(head, body)
+    RULES.add_rule(Rule(head, body))
 
-    RULES.addRule(Rule(head, body))
+
+def meta_rules_declare(head: list, body: dict):
+    _test_rule(head, body)
+    RULES.add_meta_rules(Rule(head, body))
 
 
 def fact(name, value=True):
@@ -200,12 +238,3 @@ def facts(dict_fact: dict):
                 if isinstance(val, dict):
                     raise Exception(f"Bad value type in fact '{key}' ")
     FACTS.update(dict_fact)
-
-
-def backtrack_chaining(goal, verbose=False):
-    if verbose:
-        return RULES.backward_chaining(goal, FACTS, verbose=verbose)
-
-
-def foward_chaining():
-    return RULES.foward_chaining(FACTS)
