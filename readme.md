@@ -8,7 +8,7 @@
 `source venv/bin/activate`
 - Installer les modules python avec le fichier _requirement_.txt  
 `pip install -r requirements.txt`
-- Démarrer le projet `python mvc.py`
+- Démarrer le projet `python interface.py`
 
 
 # Configurer le moteur
