@@ -25,7 +25,7 @@ Nous pouvons dessiner une forme dans le canvans dédié est choisir le
 type de chainage que nous shouaitons éxecuter.
 Il est possible depuis l'interface : 
 - De demander à activer les trace détaillé ou non dans le terminal.
-- D'activer les méta-régles définie dans le fichier *rules.py* (Cela permet de rendre compte de l'efficasité des méta régles)
+- D'activer les méta-régles définie dans le fichier *rules.py* (Cela permet de rendre compte de l'efficacité des méta régles)
 
 
 
