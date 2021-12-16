@@ -160,7 +160,7 @@ class Rules:
         return {key: facts[key] for key in facts.keys() - facts_start.keys()}
 
     def forward_chaining_width(self, facts: dict, trace=True, details=True, meta=True):
-        if trace: print("---------- foward_chaining (in deepth) ---------")
+        if trace: print("---------- foward_chaining (in width) ---------")
         facts = facts.copy()
         rules = self.meta_rules_apply(facts, active=meta,trace=trace)
         facts_start = facts.copy()
