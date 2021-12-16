@@ -2,17 +2,6 @@ import inspect
 import os
 import re
 
-
-def clear():
-    # for windows
-    if os.name == 'nt':
-        _ = os.system('cls')
-
-    # for mac and linux(here, os.name is 'posix')
-    else:
-        _ = os.system('clear')
-
-
 def str_head(head):
     return inspect.getsource(head).replace("\n", "").strip()[:-1]
 
