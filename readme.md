@@ -27,7 +27,7 @@ format d'une règle : `declare_rule(lambda expr,{"x":1,"y":2})`
 Nous pouvons dessiner une forme dans le canvans dédié et choisir le
 type de chainage que nous souhaitons éxecuter.
 Il est possible depuis l'interface : 
-- De demander a activer les traces détaillées ou non dans le terminal.
+- De demander d'activer les traces détaillées ou non dans le terminal.
 - D'activer les méta-régles définies dans le fichier *rules.py* (Cela permet de rendre compte de l'efficacité des méta-régles)
 
 
